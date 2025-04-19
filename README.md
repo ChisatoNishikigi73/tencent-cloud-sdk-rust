@@ -46,16 +46,6 @@ export TENCENTCLOUD_SECRET_KEY="你的腾讯云SecretKey"
   - 支持批量退还
   - 支持按量计费和包年包月实例
 
-### 待实现功能
-
-- ⬜ 实例查询 (DescribeInstances)
-- ⬜ 实例启停 (StartInstances/StopInstances)
-- ⬜ 实例重启 (RebootInstances)
-- ⬜ 实例重置密码 (ResetInstancesPassword)
-- ⬜ 调整实例配置 (ResetInstances)
-- ⬜ 重装实例系统 (ResetInstance)
-- ⬜ 扩容实例磁盘 (ResizeInstanceDisks)
-
 ## 使用方法
 
 ### 1. 查询地域和可用区
