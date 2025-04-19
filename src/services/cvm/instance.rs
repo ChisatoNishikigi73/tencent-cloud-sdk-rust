@@ -418,6 +418,455 @@ pub struct TerminateInstancesResponse {
 /// 退还实例响应类型
 pub type TerminateInstancesResponseType = ApiResponse<TerminateInstancesResponse>;
 
+/// 重启实例的请求参数
+#[derive(Debug, Clone, Serialize)]
+pub struct RebootInstancesRequest {
+    /// 一个或多个待操作的实例ID。可通过 DescribeInstances 接口返回值中的InstanceId获取。
+    /// 每次请求批量实例的上限为100。
+    pub InstanceIds: Vec<String>,
+
+    /// 关机类型。取值范围：
+    /// SOFT：表示软关机
+    /// HARD：表示硬关机
+    /// SOFT_FIRST：表示优先软关机，失败再执行硬关机
+    /// 
+    /// 默认取值：SOFT。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StopType: Option<String>,
+
+    /// 表示是否在正常重启失败后选择强制重启实例。
+    /// true：表示在正常重启失败后进行强制重启
+    /// false：表示在正常重启失败后不进行强制重启
+    /// 
+    /// 默认取值：false。
+    /// 
+    /// 本参数已弃用，推荐使用StopType，不可以与参数StopType同时使用。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ForceReboot: Option<bool>,
+}
+
+/// 重启实例的响应
+#[derive(Debug, Deserialize)]
+pub struct RebootInstancesResponse {
+    /// 唯一请求 ID
+    pub RequestId: String,
+}
+
+/// 重启实例响应类型
+pub type RebootInstancesResponseType = ApiResponse<RebootInstancesResponse>;
+
+/// 启动实例的请求参数
+#[derive(Debug, Clone, Serialize)]
+pub struct StartInstancesRequest {
+    /// 一个或多个待操作的实例ID。可通过 DescribeInstances 接口返回值中的InstanceId获取。
+    /// 每次请求批量实例的上限为100。
+    pub InstanceIds: Vec<String>,
+}
+
+/// 启动实例的响应
+#[derive(Debug, Deserialize)]
+pub struct StartInstancesResponse {
+    /// 唯一请求 ID
+    pub RequestId: String,
+}
+
+/// 启动实例响应类型
+pub type StartInstancesResponseType = ApiResponse<StartInstancesResponse>;
+
+/// 关闭实例的请求参数
+#[derive(Debug, Clone, Serialize)]
+pub struct StopInstancesRequest {
+    /// 一个或多个待操作的实例ID。可通过 DescribeInstances 接口返回值中的InstanceId获取。
+    /// 每次请求批量实例的上限为100。
+    pub InstanceIds: Vec<String>,
+
+    /// 实例的关闭模式。取值范围：
+    /// SOFT_FIRST：表示在正常关闭失败后进行强制关闭
+    /// HARD：直接强制关闭
+    /// SOFT：仅软关机
+    /// 
+    /// 默认取值：SOFT。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StopType: Option<String>,
+
+    /// 表示是否在正常关闭失败后选择强制关闭实例。
+    /// true：表示在正常关闭失败后进行强制关闭
+    /// false：表示在正常关闭失败后不进行强制关闭
+    /// 
+    /// 默认取值：false。
+    ///
+    /// 本参数已弃用，推荐使用StopType，不可以与参数StopType同时使用。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ForceStop: Option<bool>,
+
+    /// 按量计费实例关机收费模式。
+    /// 取值范围：
+    /// KEEP_CHARGING：关机继续收费
+    /// STOP_CHARGING：关机停止收费
+    /// 
+    /// 默认取值：KEEP_CHARGING。
+    /// 该参数只针对部分按量计费云硬盘实例生效。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StoppedMode: Option<String>,
+}
+
+/// 关闭实例的响应
+#[derive(Debug, Deserialize)]
+pub struct StopInstancesResponse {
+    /// 唯一请求 ID
+    pub RequestId: String,
+}
+
+/// 关闭实例响应类型
+pub type StopInstancesResponseType = ApiResponse<StopInstancesResponse>;
+
+/// 查询实例列表的过滤条件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Filter {
+    /// 过滤键的名称，支持各种实例相关的过滤条件
+    pub Name: String,
+    
+    /// 过滤值列表
+    pub Values: Vec<String>,
+}
+
+/// 实例的标签
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceTag {
+    /// 标签键
+    pub Key: String,
+    
+    /// 标签值
+    pub Value: String,
+}
+
+/// 系统盘信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceSystemDisk {
+    /// 系统盘ID
+    pub DiskId: String,
+    
+    /// 系统盘类型。系统盘类型限制详见存储概述。取值范围：
+    /// LOCAL_BASIC：本地硬盘
+    /// LOCAL_SSD：本地SSD硬盘
+    /// CLOUD_BASIC：普通云硬盘
+    /// CLOUD_SSD：SSD云硬盘
+    /// CLOUD_PREMIUM：高性能云硬盘
+    pub DiskType: String,
+    
+    /// 系统盘大小，单位：GB。
+    pub DiskSize: i32,
+    
+    /// 云硬盘所属的CDC集群ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CdcId: Option<String>,
+}
+
+/// 数据盘信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceDataDisk {
+    /// 数据盘ID
+    pub DiskId: String,
+    
+    /// 数据盘类型。数据盘类型限制详见存储概述。取值范围：
+    /// LOCAL_BASIC：本地硬盘
+    /// LOCAL_SSD：本地SSD硬盘
+    /// CLOUD_BASIC：普通云硬盘
+    /// CLOUD_PREMIUM：高性能云硬盘
+    /// CLOUD_SSD：SSD云硬盘
+    pub DiskType: String,
+    
+    /// 数据盘大小，单位：GB
+    pub DiskSize: i32,
+    
+    /// 是否随实例删除。取值范围：
+    /// TRUE：表示随实例删除
+    /// FALSE：表示不随实例删除
+    pub DeleteWithInstance: bool,
+    
+    /// 数据盘是否加密。取值范围：
+    /// TRUE：表示加密
+    /// FALSE：表示不加密
+    pub Encrypt: bool,
+    
+    /// 密钥ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub KmsKeyId: Option<String>,
+    
+    /// 云硬盘所属的CDC集群ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CdcId: Option<String>,
+    
+    /// 云硬盘吞吐量
+    pub ThroughputPerformance: i32,
+    
+    /// 快照ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub SnapshotId: Option<String>,
+}
+
+/// 实例位置信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstancePlacement {
+    /// 实例所属的可用区名称。
+    pub Zone: String,
+    
+    /// 实例所属项目ID。
+    pub ProjectId: i32,
+    
+    /// 实例所属的专用宿主机ID列表。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub HostIds: Option<Vec<String>>,
+    
+    /// 实例所属的专用宿主机ID。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub HostId: Option<String>,
+}
+
+/// 实例登录设置信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceLoginSettings {
+    /// 实例登录密码。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Password: Option<String>,
+    
+    /// 实例关联的密钥ID列表。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub KeyIds: Option<Vec<String>>,
+    
+    /// 是否保持镜像的原始设置。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub KeepImageLogin: Option<bool>,
+}
+
+/// 实例的VPC信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceVirtualPrivateCloud {
+    /// VPC ID。
+    pub VpcId: String,
+    
+    /// 子网ID。
+    pub SubnetId: String,
+    
+    /// 是否作为公网网关。
+    #[serde(default)]
+    pub AsVpcGateway: bool,
+    
+    /// 实例的内网IP列表。
+    #[serde(default)]
+    pub PrivateIpAddresses: Vec<String>,
+    
+    /// 实例的IPv6地址数量。
+    #[serde(default)]
+    pub Ipv6AddressCount: i32,
+}
+
+/// 实例的公网访问信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceInternetAccessible {
+    /// 网络计费类型。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InternetChargeType: Option<String>,
+    
+    /// 公网出带宽上限，单位：Mbps。
+    pub InternetMaxBandwidthOut: i32,
+    
+    /// 是否分配公网IP。
+    #[serde(default)]
+    pub PublicIpAssigned: bool,
+}
+
+/// 实例详情
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Instance {
+    /// 实例ID
+    pub InstanceId: String,
+    
+    /// 实例所在的位置相关信息
+    pub Placement: InstancePlacement,
+    
+    /// 实例的CPU核数，单位：核
+    pub CPU: i32,
+    
+    /// 实例内存容量，单位：GB
+    pub Memory: i32,
+    
+    /// 实例机型
+    pub InstanceType: String,
+    
+    /// 实例的状态，例如：PENDING，RUNNING等
+    pub InstanceState: String,
+    
+    /// 实例系统盘信息
+    pub SystemDisk: InstanceSystemDisk,
+    
+    /// 实例数据盘信息
+    #[serde(default)]
+    pub DataDisks: Vec<InstanceDataDisk>,
+    
+    /// 实例主网卡的内网IP列表
+    pub PrivateIpAddresses: Vec<String>,
+    
+    /// 实例主网卡的公网IP列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub PublicIpAddresses: Option<Vec<String>>,
+    
+    /// 实例带宽信息
+    pub InternetAccessible: InstanceInternetAccessible,
+    
+    /// 实例所属虚拟私有网络信息
+    pub VirtualPrivateCloud: InstanceVirtualPrivateCloud,
+    
+    /// 镜像ID
+    pub ImageId: String,
+    
+    /// 自动续费标识
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub RenewFlag: Option<String>,
+    
+    /// 创建时间
+    pub CreatedTime: String,
+    
+    /// 到期时间
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ExpiredTime: Option<String>,
+    
+    /// 操作系统名称
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub OsName: Option<String>,
+    
+    /// 安全组ID列表
+    #[serde(default)]
+    pub SecurityGroupIds: Vec<String>,
+    
+    /// 实例登录设置
+    pub LoginSettings: InstanceLoginSettings,
+    
+    /// 实例状态
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstanceChargeType: Option<String>,
+    
+    /// 标签列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Tags: Option<Vec<InstanceTag>>,
+    
+    /// 停止实例计费模式
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StopChargingMode: Option<String>,
+    
+    /// 实例的全局唯一ID
+    pub Uuid: String,
+    
+    /// 实例的最新操作
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LatestOperation: Option<String>,
+    
+    /// 实例的最新操作状态
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LatestOperationState: Option<String>,
+    
+    /// 实例最新操作的唯一请求ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LatestOperationRequestId: Option<String>,
+    
+    /// 实例业务状态
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub RestrictState: Option<String>,
+    
+    /// 严重安全组隔离状态
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub IsolatedSource: Option<String>,
+    
+    /// 高性能计算集群ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub HpcClusterId: Option<String>,
+    
+    /// 实例名称
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstanceName: Option<String>,
+    
+    /// 默认登录用户
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DefaultLoginUser: Option<String>,
+    
+    /// 默认登录端口
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DefaultLoginPort: Option<i32>,
+    
+    /// 实例所属的专用集群ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DedicatedClusterId: Option<String>,
+    
+    /// 实例所属的专用集群名称
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DedicatedClusterName: Option<String>,
+    
+    /// CVM实例绑定的CAM角色名
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CamRoleName: Option<String>,
+    
+    /// 实例最新操作错误信息
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LatestOperationErrorMsg: Option<String>,
+    
+    /// 实例的IPv6地址
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub IPv6Addresses: Option<Vec<String>>,
+    
+    /// RDMA集群IP
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub RdmaIpAddresses: Option<Vec<String>>,
+    
+    /// 实例的license信息
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LicenseType: Option<String>,
+    
+    /// 是否禁止调整实例配置
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DisableApiTermination: Option<bool>,
+    
+    /// 置放群组ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DisasterRecoverGroupId: Option<String>,
+}
+
+/// 查询实例列表的请求参数
+#[derive(Debug, Clone, Serialize)]
+pub struct DescribeInstancesRequest {
+    /// 按照一个或者多个实例ID查询。实例ID例如：ins-xxxxxxxx。
+    /// 每次请求的实例的上限为100。参数不支持同时指定InstanceIds和Filters。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstanceIds: Option<Vec<String>>,
+    
+    /// 过滤条件。参数不支持同时指定InstanceIds和Filters。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Filters: Option<Vec<Filter>>,
+    
+    /// 偏移量，默认为0。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Offset: Option<i32>,
+    
+    /// 返回数量，默认为20，最大值为100。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Limit: Option<i32>,
+}
+
+/// 查询实例列表的响应
+#[derive(Debug, Deserialize)]
+pub struct DescribeInstancesResponse {
+    /// 符合条件的实例数量
+    pub TotalCount: i32,
+    
+    /// 实例详情列表
+    pub InstanceSet: Vec<Instance>,
+    
+    /// 唯一请求 ID
+    pub RequestId: String,
+}
+
+/// 查询实例列表响应类型
+pub type DescribeInstancesResponseType = ApiResponse<DescribeInstancesResponse>;
+
 /// 实例服务
 pub struct InstanceService<'a> {
     client: &'a TencentCloudClient,
@@ -454,6 +903,79 @@ impl<'a> InstanceService<'a> {
         // 使用client发送请求
         self.client.request(
             "TerminateInstances", 
+            request, 
+            "cvm", 
+            "2017-03-12", 
+            Some(region)
+        ).await
+    }
+
+    /// 重启实例
+    /// 
+    /// 本接口 (RebootInstances) 用于重启实例。
+    /// 
+    /// - 只有状态为RUNNING的实例才可以进行此操作。
+    /// - 接口调用成功时，实例会进入REBOOTING状态；重启实例成功时，实例会进入RUNNING状态。
+    /// - 支持强制重启，强制重启可能会导致数据丢失或文件系统损坏，请仅在服务器不能正常重启时使用。
+    pub async fn reboot_instances(&self, request: &RebootInstancesRequest, region: &str) -> Result<RebootInstancesResponseType> {
+        // 使用client发送请求
+        self.client.request(
+            "RebootInstances", 
+            request, 
+            "cvm", 
+            "2017-03-12", 
+            Some(region)
+        ).await
+    }
+
+    /// 启动实例
+    /// 
+    /// 本接口 (StartInstances) 用于启动一个或多个实例。
+    /// 
+    /// - 只有状态为STOPPED的实例才可以进行此操作。
+    /// - 接口调用成功时，实例会进入STARTING状态；启动实例成功时，实例会进入RUNNING状态。
+    /// - 本接口为异步接口，启动实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。
+    pub async fn start_instances(&self, request: &StartInstancesRequest, region: &str) -> Result<StartInstancesResponseType> {
+        // 使用client发送请求
+        self.client.request(
+            "StartInstances", 
+            request, 
+            "cvm", 
+            "2017-03-12", 
+            Some(region)
+        ).await
+    }
+
+    /// 关闭实例
+    /// 
+    /// 本接口 (StopInstances) 用于关闭一个或多个实例。
+    /// 
+    /// - 只有状态为RUNNING的实例才可以进行此操作。
+    /// - 接口调用成功时，实例会进入STOPPING状态；关闭实例成功时，实例会进入STOPPED状态。
+    /// - 支持强制关闭，强制关闭可能会导致数据丢失或文件系统损坏，请仅在服务器不能正常关机时使用。
+    /// - 本接口为异步接口，关闭实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。
+    pub async fn stop_instances(&self, request: &StopInstancesRequest, region: &str) -> Result<StopInstancesResponseType> {
+        // 使用client发送请求
+        self.client.request(
+            "StopInstances", 
+            request, 
+            "cvm", 
+            "2017-03-12", 
+            Some(region)
+        ).await
+    }
+
+    /// 查询实例列表
+    /// 
+    /// 本接口 (DescribeInstances) 用于查询一个或多个实例的详细信息。
+    /// 
+    /// - 可以根据实例ID、实例名称或者实例计费模式等信息来查询实例的详细信息
+    /// - 如果参数为空，返回当前用户一定数量（Limit所指定的数量，默认为20）的实例
+    /// - 支持查询实例的最新操作（LatestOperation）以及最新操作状态(LatestOperationState)
+    pub async fn describe_instances(&self, request: &DescribeInstancesRequest, region: &str) -> Result<DescribeInstancesResponseType> {
+        // 使用client发送请求
+        self.client.request(
+            "DescribeInstances", 
             request, 
             "cvm", 
             "2017-03-12", 

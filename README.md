@@ -9,7 +9,9 @@
 - [使用方法](#使用方法)
   - [查询地域和可用区](#1-查询地域和可用区)
   - [创建实例](#2-创建实例)
-  - [退还实例](#3-退还实例)
+  - [启动/关闭/重启实例](#3-启动关闭重启实例)
+  - [查询实例](#4-查询实例)
+  - [退还实例](#5-退还实例)
 - [许可证](#许可证)
 
 ## 安装和环境配置
@@ -41,6 +43,20 @@ export TENCENTCLOUD_SECRET_KEY="你的腾讯云SecretKey"
   - 支持按量计费和竞价实例
   - 支持自定义配置（实例类型、系统盘等）
   - 支持网络配置和安全组配置
+  
+- ✅ 实例生命周期管理
+  - 启动实例 (StartInstances)
+  - 关闭实例 (StopInstances)
+  - 重启实例 (RebootInstances)
+  - 支持批量操作
+  - 支持软/硬关机和重启
+  
+- ✅ 查询实例 (DescribeInstances)
+  - 支持按实例ID查询
+  - 支持按可用区查询
+  - 支持按实例名称查询
+  - 支持按标签查询
+  - 支持按实例状态查询
   
 - ✅ 退还实例 (TerminateInstances)
   - 支持批量退还
@@ -123,7 +139,99 @@ let request = RunInstancesRequest {
 let response = instance_service.run_instances(&request, "ap-guangzhou").await?;
 ```
 
-### 3. 退还实例
+### 3. 启动/关闭/重启实例
+
+```rust
+use tencent_cloud_sdk::{
+    TencentCloudClient,
+    services::cvm::instance::{
+        InstanceService, StartInstancesRequest, StopInstancesRequest, RebootInstancesRequest
+    }
+};
+
+// 创建客户端和服务
+let client = TencentCloudClient::new(secret_id, secret_key);
+let instance_service = InstanceService::new(&client);
+let region = "ap-guangzhou";
+
+// 启动实例
+let start_request = StartInstancesRequest {
+    InstanceIds: vec!["ins-xxxxxxxx".to_string()],
+};
+let start_response = instance_service.start_instances(&start_request, region).await?;
+
+// 关闭实例
+let stop_request = StopInstancesRequest {
+    InstanceIds: vec!["ins-xxxxxxxx".to_string()],
+    StopType: Some("SOFT".to_string()),  // 软关机，可选SOFT/HARD/SOFT_FIRST
+    StoppedMode: Some("KEEP_CHARGING".to_string()),  // 关机继续收费
+    ForceStop: None,  // 已弃用参数
+};
+let stop_response = instance_service.stop_instances(&stop_request, region).await?;
+
+// 重启实例
+let reboot_request = RebootInstancesRequest {
+    InstanceIds: vec!["ins-xxxxxxxx".to_string()],
+    StopType: Some("SOFT".to_string()),  // 软重启，可选SOFT/HARD/SOFT_FIRST
+    ForceReboot: None,  // 已弃用参数
+};
+let reboot_response = instance_service.reboot_instances(&reboot_request, region).await?;
+```
+
+### 4. 查询实例
+
+```rust
+use tencent_cloud_sdk::{
+    TencentCloudClient,
+    services::cvm::instance::{InstanceService, DescribeInstancesRequest, Filter}
+};
+
+// 创建客户端和服务
+let client = TencentCloudClient::new(secret_id, secret_key);
+let instance_service = InstanceService::new(&client);
+let region = "ap-guangzhou";
+
+// 按实例ID查询
+let id_request = DescribeInstancesRequest {
+    InstanceIds: Some(vec!["ins-xxxxxxxx".to_string()]),
+    Filters: None,
+    Offset: None,
+    Limit: None,
+};
+let id_response = instance_service.describe_instances(&id_request, region).await?;
+
+// 按可用区查询
+let mut filters = Vec::new();
+filters.push(Filter {
+    Name: "zone".to_string(),
+    Values: vec!["ap-guangzhou-6".to_string()],
+});
+
+let zone_request = DescribeInstancesRequest {
+    InstanceIds: None,
+    Filters: Some(filters),
+    Offset: None,
+    Limit: Some(20),
+};
+let zone_response = instance_service.describe_instances(&zone_request, region).await?;
+
+// 按实例状态查询
+let mut filters = Vec::new();
+filters.push(Filter {
+    Name: "instance-state".to_string(),
+    Values: vec!["RUNNING".to_string()],
+});
+
+let state_request = DescribeInstancesRequest {
+    InstanceIds: None,
+    Filters: Some(filters),
+    Offset: None,
+    Limit: Some(20),
+};
+let state_response = instance_service.describe_instances(&state_request, region).await?;
+```
+
+### 5. 退还实例
 
 ```rust
 use tencent_cloud_sdk::{

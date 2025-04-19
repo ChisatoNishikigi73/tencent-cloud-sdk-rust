@@ -1,6 +1,6 @@
 [package]
 name = "tencent_cloud_sdk"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 description = "Tencent Cloud API SDK for Rust"
 repository = "https://github.com/chisatonishikigi73/tencent-cloud-sdk-rust"
@@ -33,3 +33,7 @@ path = "examples/instance_create.rs"
 [[example]]
 name = "instance_terminate"
 path = "examples/instance_terminate.rs"
+
+[[example]]
+name = "instance_lifecycle"
+path = "examples/instance_lifecycle.rs"
