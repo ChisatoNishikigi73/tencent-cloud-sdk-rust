@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         InstanceCount: Some(1),
         
         // 实例名称
-        InstanceName: Some("frp".to_string()),
+        InstanceName: Some("test".to_string()),
         
         // 登录设置
         LoginSettings: Some(LoginSettings {
@@ -73,8 +73,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // 公网带宽 - 不需要公网IP
         InternetAccessible: Some(InternetAccessible {
             InternetChargeType: "TRAFFIC_POSTPAID_BY_HOUR".to_string(),
-            InternetMaxBandwidthOut: 0,
-            PublicIpAssigned: Some(false),
+            InternetMaxBandwidthOut: 1,
+            PublicIpAssigned: Some(true),
             BandwidthPackageId: None,
         }),
         

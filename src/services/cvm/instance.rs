@@ -712,10 +712,12 @@ pub struct Instance {
     pub PublicIpAddresses: Option<Vec<String>>,
     
     /// 实例带宽信息
-    pub InternetAccessible: InstanceInternetAccessible,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InternetAccessible: Option<InstanceInternetAccessible>,
     
     /// 实例所属虚拟私有网络信息
-    pub VirtualPrivateCloud: InstanceVirtualPrivateCloud,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub VirtualPrivateCloud: Option<InstanceVirtualPrivateCloud>,
     
     /// 镜像ID
     pub ImageId: String,
@@ -740,7 +742,8 @@ pub struct Instance {
     pub SecurityGroupIds: Vec<String>,
     
     /// 实例登录设置
-    pub LoginSettings: InstanceLoginSettings,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LoginSettings: Option<InstanceLoginSettings>,
     
     /// 实例状态
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -755,7 +758,8 @@ pub struct Instance {
     pub StopChargingMode: Option<String>,
     
     /// 实例的全局唯一ID
-    pub Uuid: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Uuid: Option<String>,
     
     /// 实例的最新操作
     #[serde(skip_serializing_if = "Option::is_none")]

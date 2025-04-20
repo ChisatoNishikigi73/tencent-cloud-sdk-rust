@@ -236,6 +236,17 @@ fn display_instances(response: &tencent_cloud_sdk::services::cvm::instance::Desc
                 }
             }
         }
+        
+        // 显示VPC信息（如果有）
+        if let Some(vpc) = &instance.VirtualPrivateCloud {
+            println!("VPC ID: {}", vpc.VpcId);
+            println!("子网ID: {}", vpc.SubnetId);
+        }
+        
+        // 显示UUID（如果有）
+        if let Some(uuid) = &instance.Uuid {
+            println!("UUID: {}", uuid);
+        }
     }
 }
 
