@@ -89,6 +89,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             AutomationService: None,
         }),
         
+        // 添加开机运行脚本 - 安装nginx
+        // 这里提供的脚本需要使用Base64编码
+        // 原始脚本内容:
+        // #!/bin/bash
+        // yum update -y
+        // yum install -y nginx
+        // systemctl enable nginx
+        // systemctl start nginx
+        // echo "<h1>Hello from Chisato73</h1>" > /usr/share/nginx/html/index.html
+        UserData: Some("IyEvYmluL2Jhc2gKeXVtIHVwZGF0ZSAteQp5dW0gaW5zdGFsbCAteSBuZ2lueApzeXN0ZW1jdGwgZW5hYmxlIG5naW54CnN5c3RlbWN0bCBzdGFydCBuZ2lueAplY2hvICI8aDE+SGVsbG8gZnJvbSBDaGlzYXRvNzM8L2gxPiIgPiAvdXNyL3NoYXJlL25naW54L2h0bWwvaW5kZXguaHRtbA==".to_string()),
+        
         // 其他参数
         DataDisks: None,
         ClientToken: None,
@@ -96,6 +107,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         TagSpecification: None,
         ProjectId: None,
         InstanceChargePrepaid: None,
+        ActionTimer: None,
+        DisasterRecoverGroupIds: None,
+        InstanceMarketOptions: None,
+        DryRun: None,
+        CpuTopology: None,
+        CamRoleName: None,
+        HpcClusterId: None,
+        LaunchTemplate: None,
+        DedicatedClusterId: None,
+        ChcIds: None,
+        DisableApiTermination: None,
     };
     
     // 发送创建请求

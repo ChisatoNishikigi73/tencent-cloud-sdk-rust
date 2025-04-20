@@ -1,6 +1,6 @@
 [package]
 name = "tencent_cloud_sdk"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 description = "Tencent Cloud API SDK for Rust"
 repository = "https://github.com/chisatonishikigi73/tencent-cloud-sdk-rust"
@@ -41,3 +41,7 @@ path = "examples/instance_lifecycle.rs"
 [[example]]
 name = "instance_price_inquiry"
 path = "examples/instance_price_inquiry.rs"
+
+[[example]]
+name = "instance_config_info"
+path = "examples/instance_config_info.rs"

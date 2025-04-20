@@ -293,6 +293,69 @@ pub struct Tag {
     pub Value: String,
 }
 
+/// 定时任务
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActionTimer {
+    /// 定时器动作，目前仅支持销毁云主机
+    /// 取值范围：TerminateInstances
+    pub TimerAction: String,
+    
+    /// 执行时间，格式形如："2018-5-29 11:26:40"，北京时间
+    pub ActionTime: String,
+}
+
+/// CPU拓扑结构
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CpuTopology {
+    /// 每个核心的线程数
+    pub ThreadsPerCore: i32,
+    
+    /// 核心数
+    pub CoreCount: i32,
+}
+
+/// 实例市场相关选项
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceMarketOptionsRequest {
+    /// 竞价相关选项
+    pub SpotOptions: SpotMarketOptions,
+    
+    /// 市场选项类型，当前只支持取值：spot
+    pub MarketType: String,
+}
+
+/// 竞价相关选项
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpotMarketOptions {
+    /// 竞价出价，只需要关注SpotMaxPrice参数
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub MaxPrice: Option<String>,
+
+    /// 竞价实例类型，默认取值：one-time
+    /// one-time：表示竞价实例呗释放后不会再次竞价
+    /// persistent：表示竞价实例呗释放后还会再次竞价
+    /// 默认取值：one-time
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub SpotInstanceType: Option<String>,
+    
+    /// 竞价实例竞价时长，单位：小时
+    /// 该参数默认取值为1，最大值为6
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub SpotDurationHours: Option<i32>,
+}
+
+/// 实例启动模板
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LaunchTemplate {
+    /// 实例启动模板ID，通过DescribeLaunchTemplates查询
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LaunchTemplateId: Option<String>,
+    
+    /// 实例启动模板版本号，通过DescribeLaunchTemplateVersions查询
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LaunchTemplateVersion: Option<String>,
+}
+
 /// 创建实例的请求参数
 #[derive(Debug, Clone, Serialize)]
 pub struct RunInstancesRequest {
@@ -372,6 +435,64 @@ pub struct RunInstancesRequest {
     /// 实例所属项目ID。该参数可以通过调用 DescribeProjects 的返回值中的 projectId 字段来获取。不填为默认项目。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ProjectId: Option<i32>,
+
+    /// 实例自定义数据，需要以Base64方式编码
+    /// 支持的最大数据大小为16KB
+    /// 当实例启动时，系统将会执行该脚本
+    /// Linux系统使用cloud-init执行，Windows系统使用cloudbase-init执行
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UserData: Option<String>,
+    
+    /// 定时任务。通过该参数可以为实例指定定时任务，目前仅支持定时销毁。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ActionTimer: Option<ActionTimer>,
+    
+    /// 置放群组ID列表，仅支持指定一个。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DisasterRecoverGroupIds: Option<Vec<String>>,
+    
+    /// 实例的市场相关选项，如竞价实例相关参数，若指定实例的付费模式为竞价付费但没有传递该参数时，默认按当前固定折扣价格出价。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstanceMarketOptions: Option<InstanceMarketOptionsRequest>,
+    
+    /// 是否只预检此次请求。
+    /// true：发送检查请求，不会创建实例。检查项包括是否填写了必需参数，请求格式，业务限制和云服务器库存。
+    /// 如果检查不通过，则返回对应错误码；
+    /// 如果检查通过，则返回RequestId.
+    /// false（默认）：发送正常请求，通过检查后直接创建实例
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DryRun: Option<bool>,
+    
+    /// 描述了实例CPU拓扑结构的相关信息。若不指定该参数，则按系统资源情况决定。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CpuTopology: Option<CpuTopology>,
+    
+    /// CAM角色名称。可通过DescribeRoleList接口返回值中的roleName获取。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CamRoleName: Option<String>,
+    
+    /// 高性能计算集群ID。若创建的实例为高性能计算实例，需指定实例放置的集群，否则不可指定。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub HpcClusterId: Option<String>,
+    
+    /// 实例启动模板。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub LaunchTemplate: Option<LaunchTemplate>,
+    
+    /// 指定专用集群创建。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DedicatedClusterId: Option<String>,
+    
+    /// 指定CHC物理服务器来创建CHC云主机。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ChcIds: Option<Vec<String>>,
+    
+    /// 实例销毁保护标志，表示是否允许通过api接口删除实例。取值范围：
+    /// true：表示开启实例保护，不允许通过api接口删除实例
+    /// false：表示关闭实例保护，允许通过api接口删除实例
+    /// 默认取值：false。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DisableApiTermination: Option<bool>,
 }
 
 /// 创建实例的响应

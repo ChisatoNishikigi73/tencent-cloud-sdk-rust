@@ -315,63 +315,259 @@ pub struct ExitRescueModeResponse {
 /// 退出救援模式响应类型
 pub type ExitRescueModeResponseType = ApiResponse<ExitRescueModeResponse>;
 
-/// 获取可用区机型配置信息请求参数
+/// 查询可用区的机型配置信息的过滤条件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Filter {
+    /// 过滤条件的名称
+    pub Name: String,
+    
+    /// 过滤条件的值
+    pub Values: Vec<String>,
+}
+
+/// 获取可用区机型配置信息请求
 #[derive(Debug, Clone, Serialize)]
 pub struct DescribeZoneInstanceConfigInfosRequest {
-    /// 过滤条件
+    /// 过滤条件，可支持的过滤条件如下：
+    /// - zone: 按照可用区过滤，如 ap-guangzhou-1
+    /// - instance-family: 按照实例机型系列过滤，如 S1、I1、M1等
+    /// - instance-type: 按照实例机型过滤
+    /// - instance-charge-type: 按照实例计费模式过滤
+    /// - sort-keys: 按关键字排序
     #[serde(skip_serializing_if = "Option::is_none")]
     pub Filters: Option<Vec<Filter>>,
 }
 
-/// 过滤条件
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Filter {
-    /// 过滤条件名称
-    pub Name: String,
+/// 机型配置价格信息
+#[derive(Debug, Clone, Deserialize)]
+pub struct InstanceTypePrice {
+    /// 描述了按带宽计费的价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPrice: Option<f64>,
     
-    /// 过滤条件值
-    pub Values: Vec<String>,
+    /// 描述了按流量计费的价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPriceDiscount: Option<f64>,
+    
+    /// 步进价格阶梯1
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPriceSecondStep: Option<f64>,
+    
+    /// 步进价格阶梯2
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPriceThirdStep: Option<f64>,
+    
+    /// 步进价格折后阶梯1
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPriceDiscountSecondStep: Option<f64>,
+    
+    /// 步进价格折后阶梯2
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnitPriceDiscountThirdStep: Option<f64>,
+    
+    /// 原始价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub OriginalPrice: Option<f64>,
+    
+    /// 折扣价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountPrice: Option<f64>,
+    
+    /// 折扣
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Discount: Option<f64>,
+    
+    /// 计费单位：HOUR(小时)，MONTH(月)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ChargeUnit: Option<String>,
+    
+    /// 一年原始价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub OriginalPriceOneYear: Option<f64>,
+    
+    /// 一年折扣价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountPriceOneYear: Option<f64>,
+    
+    /// 一年折扣
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountOneYear: Option<f64>,
+    
+    /// 三年原始价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub OriginalPriceThreeYear: Option<f64>,
+    
+    /// 三年折扣价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountPriceThreeYear: Option<f64>,
+    
+    /// 三年折扣
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountThreeYear: Option<f64>,
+    
+    /// 五年原始价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub OriginalPriceFiveYear: Option<f64>,
+    
+    /// 五年折扣价格
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountPriceFiveYear: Option<f64>,
+    
+    /// 五年折扣
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub DiscountFiveYear: Option<f64>,
 }
 
-/// 地域可用区信息
+/// 外部数据结构
 #[derive(Debug, Clone, Deserialize)]
-pub struct RegionZone {
-    /// 地域名称。
-    pub Region: String,
+pub struct InstanceTypeExternals {
+    /// 释放地址
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ReleaseAddress: Option<bool>,
     
-    /// 可用区名称
+    /// 不支持的特性
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub UnsupportedFeatures: Option<Vec<String>>,
+    
+    /// 存储接口类型
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StorageBlockAttr: Option<StorageBlock>,
+    
+    /// CpuType对应的PlatformId
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CpuPlatformId: Option<i32>,
+}
+
+/// 存储块属性
+#[derive(Debug, Clone, Deserialize)]
+pub struct StorageBlock {
+    /// 本地存储类型，值为：LOCAL_BASIC、LOCAL_SSD、LOCAL_NVME、LOCAL_HDD、CLOUD_BASIC、CLOUD_PREMIUM、CLOUD_SSD 等
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Type: Option<String>,
+    
+    /// 本地存储的最小大小
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub MinSize: Option<i32>,
+    
+    /// 本地存储的最大大小
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub MaxSize: Option<i32>,
+}
+
+/// 本地磁盘规格
+#[derive(Debug, Clone, Deserialize)]
+pub struct LocalDiskType {
+    /// 磁盘类型
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Type: Option<String>,
+    
+    /// 磁盘描述
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub PartitionType: Option<String>,
+    
+    /// 磁盘大小，单位GB
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub MinSize: Option<i32>,
+    
+    /// 磁盘大小，单位GB
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub MaxSize: Option<i32>,
+    
+    /// 磁盘是否必选
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Required: Option<String>,
+}
+
+/// 机型配置信息
+#[derive(Debug, Clone, Deserialize)]
+pub struct InstanceTypeQuotaItem {
+    /// 可用区。
     pub Zone: String,
     
-    /// 机型信息
-    pub InstanceTypeSet: Vec<InstanceType>,
-}
-
-/// 机型信息
-#[derive(Debug, Clone, Deserialize)]
-pub struct InstanceType {
-    /// 机型名称
+    /// 实例机型。
     pub InstanceType: String,
     
-    /// CPU核数
-    pub CPU: i32,
+    /// 实例计费模式。取值范围： PREPAID：表示预付费，即包年包月 POSTPAID_BY_HOUR：表示后付费，即按量计费 CDHPAID：表示CDH付费，即只对CDH计费，不对CDH上的实例计费。 SPOTPAID：表示竞价实例付费 CDCPAID：表示专用集群付费
+    pub InstanceChargeType: String,
     
-    /// 内存大小
-    pub Memory: i32,
+    /// 网卡类型。1：表示实例位于基础网络 0：表示实例位于VPC中。
+    pub NetworkCard: i32,
     
-    /// 是否黑石2.0
+    /// 扩展属性。
+    pub Externals: InstanceTypeExternals,
+    
+    /// 实例的CPU核数，单位：核。
+    pub Cpu: i32,
+    
+    /// 实例内存容量，单位：GB。
+    pub Memory: f64,
+    
+    /// 实例机型系列。
+    pub InstanceFamily: String,
+    
+    /// 机型名称。
+    pub TypeName: String,
+    
+    /// 本地磁盘规格列表。当该参数返回为空值时，表示当前情况下无法创建本地盘。
+    pub LocalDiskTypeList: Vec<LocalDiskType>,
+    
+    /// 实例是否售卖。取值范围： SELL：表示实例可购买 SOLD_OUT：表示实例已售罄。
+    pub Status: String,
+    
+    /// 实例的售卖状态。取值范围： AVAILABLE：运营中 UNAVAILABLE：不可用
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub CbsSupport: Option<String>,
+    pub StatusCategory: Option<String>,
     
-    /// 机型标记
+    /// 机型售罄原因。
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub InstanceTypeState: Option<String>,
+    pub SoldOutReason: Option<String>,
+    
+    /// 实例的价格。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Price: Option<InstanceTypePrice>,
+    
+    /// 机型处理器类型。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub CpuType: Option<String>,
+    
+    /// 机型处理器主频。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Frequency: Option<String>,
+    
+    /// 实例挂载的块存储设备数量上限。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub StorageBlockAmount: Option<i32>,
+    
+    /// 实例网络性能的上限。 单位：Gbps
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstanceBandwidth: Option<f64>,
+    
+    /// 网络收发包能力上限。 单位：万PPS
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub InstancePps: Option<f64>,
+    
+    /// GPU数量。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Gpu: Option<f64>,
+    
+    /// GPU类型。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub GpuCount: Option<f64>,
+    
+    /// FPGA数量。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Fpga: Option<f64>,
+    
+    /// 备注信息。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub Remark: Option<String>,
 }
 
 /// 获取可用区机型配置信息响应
 #[derive(Debug, Deserialize)]
 pub struct DescribeZoneInstanceConfigInfosResponse {
-    /// 可用区机型配置列表
-    pub InstanceTypeQuotaSet: Vec<RegionZone>,
+    /// 可用区机型配置列表。
+    pub InstanceTypeQuotaSet: Vec<InstanceTypeQuotaItem>,
     
     /// 唯一请求 ID
     pub RequestId: String,
@@ -567,10 +763,14 @@ impl<'a> InstanceConfigService<'a> {
         ).await
     }
     
-    /// 获取可用区机型配置信息
+    /// 获取可用区的机型配置信息
     /// 
     /// 本接口(DescribeZoneInstanceConfigInfos)用于获取可用区的机型信息。
-    pub async fn describe_zone_instance_config_infos(&self, request: &DescribeZoneInstanceConfigInfosRequest, region: &str) -> Result<DescribeZoneInstanceConfigInfosResponseType> {
+    pub async fn describe_zone_instance_config_infos(
+        &self,
+        request: &DescribeZoneInstanceConfigInfosRequest,
+        region: &str,
+    ) -> Result<DescribeZoneInstanceConfigInfosResponseType> {
         self.client.request(
             "DescribeZoneInstanceConfigInfos", 
             request, 
