@@ -1,6 +1,6 @@
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{InstanceService, TerminateInstancesRequest}
+    services::cvm::instance_operation::{InstanceOperationService, TerminateInstancesRequest}
 };
 use std::env;
 
@@ -15,8 +15,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建客户端
     let client = TencentCloudClient::new(secret_id, secret_key);
     
-    // 创建实例服务
-    let instance_service = InstanceService::new(&client);
+    // 创建实例操作服务
+    let instance_operation_service = InstanceOperationService::new(&client);
     
     // 设置区域
     let region = "ap-guangzhou";
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // 发送退还请求
     println!("正在退还实例...");
-    match instance_service.terminate_instances(&request, region).await {
+    match instance_operation_service.terminate_instances(&request, region).await {
         Ok(_) => {
             println!("实例退还请求已提交成功");
             println!("按量计费实例将被直接销毁，包年包月实例将被移至回收站");

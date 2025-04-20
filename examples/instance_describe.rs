@@ -1,6 +1,7 @@
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{InstanceService, DescribeInstancesRequest, Filter}
+    services::cvm::instance_query::{InstanceQueryService, DescribeInstancesRequest, DescribeInstancesResponse},
+    services::cvm::instance::Filter
 };
 use std::env;
 
@@ -15,8 +16,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建客户端
     let client = TencentCloudClient::new(secret_id, secret_key);
     
-    // 创建实例服务
-    let instance_service = InstanceService::new(&client);
+    // 创建实例查询服务
+    let instance_query_service = InstanceQueryService::new(&client);
     
     // 设置区域
     let region = "ap-guangzhou";
@@ -43,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: None,
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -54,13 +55,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
                 
-                let zone = &args[2];
+                let zone = args[2].clone();
                 println!("正在查询可用区 {} 的实例", zone);
                 
                 let mut filters = Vec::new();
                 filters.push(Filter {
                     Name: "zone".to_string(),
-                    Values: vec![zone.clone()],
+                    Values: vec![zone],
                 });
                 
                 let request = DescribeInstancesRequest {
@@ -70,7 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: Some(20),
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -81,13 +82,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
                 
-                let name = &args[2];
+                let name = args[2].clone();
                 println!("正在查询名称为 {} 的实例", name);
                 
                 let mut filters = Vec::new();
                 filters.push(Filter {
                     Name: "instance-name".to_string(),
-                    Values: vec![name.clone()],
+                    Values: vec![name],
                 });
                 
                 let request = DescribeInstancesRequest {
@@ -97,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: Some(20),
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -108,14 +109,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
                 
-                let tag_key = &args[2];
-                let tag_value = &args[3];
+                let tag_key = args[2].clone();
+                let tag_value = args[3].clone();
                 println!("正在查询标签键值对为 {}:{} 的实例", tag_key, tag_value);
                 
                 let mut filters = Vec::new();
                 filters.push(Filter {
                     Name: format!("tag:{}", tag_key),
-                    Values: vec![tag_value.clone()],
+                    Values: vec![tag_value],
                 });
                 
                 let request = DescribeInstancesRequest {
@@ -125,7 +126,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: Some(20),
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -140,7 +141,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: Some(20),
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -152,13 +153,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
                 
-                let state = &args[2];
+                let state = args[2].clone();
                 println!("正在查询状态为 {} 的实例", state);
                 
                 let mut filters = Vec::new();
                 filters.push(Filter {
                     Name: "instance-state".to_string(),
-                    Values: vec![state.clone()],
+                    Values: vec![state],
                 });
                 
                 let request = DescribeInstancesRequest {
@@ -168,7 +169,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Limit: Some(20),
                 };
                 
-                let response = instance_service.describe_instances(&request, region).await?;
+                let response = instance_query_service.describe_instances(&request, region).await?;
                 display_instances(&response.Response);
             },
             
@@ -184,19 +185,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // 格式化显示实例信息
-fn display_instances(response: &tencent_cloud_sdk::services::cvm::instance::DescribeInstancesResponse) {
+fn display_instances(response: &DescribeInstancesResponse) {
     println!("找到 {} 个符合条件的实例:", response.TotalCount);
     println!("{:<20} {:<15} {:<15} {:<15} {:<15}", "实例ID", "实例名称", "状态", "实例类型", "可用区");
     println!("{}", "-".repeat(80));
     
     for instance in &response.InstanceSet {
-        let instance_name = instance.InstanceName.as_ref().map_or("N/A", |s| s.as_str());
+        let n_a = String::from("N/A");
+        let zone_value = instance.Placement.Zone.as_ref().unwrap_or(&n_a);
         println!("{:<20} {:<15} {:<15} {:<15} {:<15}", 
             instance.InstanceId, 
-            instance_name, 
+            instance.InstanceName, 
             instance.InstanceState, 
             instance.InstanceType, 
-            instance.Placement.Zone
+            zone_value
         );
     }
     
@@ -204,36 +206,20 @@ fn display_instances(response: &tencent_cloud_sdk::services::cvm::instance::Desc
         println!("\n详细信息示例 (第一个实例):");
         let instance = &response.InstanceSet[0];
         println!("ID: {}", instance.InstanceId);
-        
-        let instance_name = instance.InstanceName.as_ref().map_or("N/A", |s| s.as_str());
-        println!("名称: {}", instance_name);
-        
+        println!("名称: {}", instance.InstanceName);
         println!("状态: {}", instance.InstanceState);
         println!("创建时间: {}", instance.CreatedTime);
-        
-        let os_name = instance.OsName.as_ref().map_or("N/A", |s| s.as_str());
-        println!("操作系统: {}", os_name);
-        
+        println!("操作系统: {}", instance.OsName);
         println!("CPU: {} 核", instance.CPU);
         println!("内存: {} GB", instance.Memory);
-        println!("内网IP: {:?}", instance.PrivateIpAddresses);
+        
+        if let Some(ips) = &instance.PrivateIpAddresses {
+            println!("内网IP: {:?}", ips);
+        }
+        
         if let Some(ips) = &instance.PublicIpAddresses {
             if !ips.is_empty() {
                 println!("公网IP: {:?}", ips);
-            }
-        }
-        
-        let latest_operation = instance.LatestOperation.as_ref().map_or("N/A", |s| s.as_str());
-        let latest_operation_state = instance.LatestOperationState.as_ref().map_or("N/A", |s| s.as_str());
-        println!("最新操作: {}", latest_operation);
-        println!("最新操作状态: {}", latest_operation_state);
-        
-        if let Some(tags) = &instance.Tags {
-            if !tags.is_empty() {
-                println!("标签:");
-                for tag in tags {
-                    println!("  - {}:{}", tag.Key, tag.Value);
-                }
             }
         }
         
@@ -241,11 +227,6 @@ fn display_instances(response: &tencent_cloud_sdk::services::cvm::instance::Desc
         if let Some(vpc) = &instance.VirtualPrivateCloud {
             println!("VPC ID: {}", vpc.VpcId);
             println!("子网ID: {}", vpc.SubnetId);
-        }
-        
-        // 显示UUID（如果有）
-        if let Some(uuid) = &instance.Uuid {
-            println!("UUID: {}", uuid);
         }
     }
 }

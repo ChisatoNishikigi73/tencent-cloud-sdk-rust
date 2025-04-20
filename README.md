@@ -12,6 +12,7 @@
   - [启动/关闭/重启实例](#3-启动关闭重启实例)
   - [查询实例](#4-查询实例)
   - [退还实例](#5-退还实例)
+  - [实例询价](#6-实例询价)
 - [许可证](#许可证)
 
 ## 安装和环境配置
@@ -144,21 +145,21 @@ let response = instance_service.run_instances(&request, "ap-guangzhou").await?;
 ```rust
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{
-        InstanceService, StartInstancesRequest, StopInstancesRequest, RebootInstancesRequest
+    services::cvm::instance_operation::{
+        InstanceOperationService, StartInstancesRequest, StopInstancesRequest, RebootInstancesRequest
     }
 };
 
 // 创建客户端和服务
 let client = TencentCloudClient::new(secret_id, secret_key);
-let instance_service = InstanceService::new(&client);
+let instance_operation_service = InstanceOperationService::new(&client);
 let region = "ap-guangzhou";
 
 // 启动实例
 let start_request = StartInstancesRequest {
     InstanceIds: vec!["ins-xxxxxxxx".to_string()],
 };
-let start_response = instance_service.start_instances(&start_request, region).await?;
+let start_response = instance_operation_service.start_instances(&start_request, region).await?;
 
 // 关闭实例
 let stop_request = StopInstancesRequest {
@@ -167,7 +168,7 @@ let stop_request = StopInstancesRequest {
     StoppedMode: Some("KEEP_CHARGING".to_string()),  // 关机继续收费
     ForceStop: None,  // 已弃用参数
 };
-let stop_response = instance_service.stop_instances(&stop_request, region).await?;
+let stop_response = instance_operation_service.stop_instances(&stop_request, region).await?;
 
 // 重启实例
 let reboot_request = RebootInstancesRequest {
@@ -175,7 +176,7 @@ let reboot_request = RebootInstancesRequest {
     StopType: Some("SOFT".to_string()),  // 软重启，可选SOFT/HARD/SOFT_FIRST
     ForceReboot: None,  // 已弃用参数
 };
-let reboot_response = instance_service.reboot_instances(&reboot_request, region).await?;
+let reboot_response = instance_operation_service.reboot_instances(&reboot_request, region).await?;
 ```
 
 ### 4. 查询实例
@@ -183,12 +184,13 @@ let reboot_response = instance_service.reboot_instances(&reboot_request, region)
 ```rust
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{InstanceService, DescribeInstancesRequest, Filter}
+    services::cvm::instance_query::{InstanceQueryService, DescribeInstancesRequest},
+    services::cvm::instance::Filter
 };
 
 // 创建客户端和服务
 let client = TencentCloudClient::new(secret_id, secret_key);
-let instance_service = InstanceService::new(&client);
+let instance_query_service = InstanceQueryService::new(&client);
 let region = "ap-guangzhou";
 
 // 按实例ID查询
@@ -198,7 +200,7 @@ let id_request = DescribeInstancesRequest {
     Offset: None,
     Limit: None,
 };
-let id_response = instance_service.describe_instances(&id_request, region).await?;
+let id_response = instance_query_service.describe_instances(&id_request, region).await?;
 
 // 按可用区查询
 let mut filters = Vec::new();
@@ -213,7 +215,7 @@ let zone_request = DescribeInstancesRequest {
     Offset: None,
     Limit: Some(20),
 };
-let zone_response = instance_service.describe_instances(&zone_request, region).await?;
+let zone_response = instance_query_service.describe_instances(&zone_request, region).await?;
 
 // 按实例状态查询
 let mut filters = Vec::new();
@@ -228,7 +230,7 @@ let state_request = DescribeInstancesRequest {
     Offset: None,
     Limit: Some(20),
 };
-let state_response = instance_service.describe_instances(&state_request, region).await?;
+let state_response = instance_query_service.describe_instances(&state_request, region).await?;
 ```
 
 ### 5. 退还实例
@@ -236,12 +238,12 @@ let state_response = instance_service.describe_instances(&state_request, region)
 ```rust
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{InstanceService, TerminateInstancesRequest}
+    services::cvm::instance_operation::{InstanceOperationService, TerminateInstancesRequest}
 };
 
 // 创建客户端和服务
 let client = TencentCloudClient::new(secret_id, secret_key);
-let instance_service = InstanceService::new(&client);
+let instance_operation_service = InstanceOperationService::new(&client);
 
 // 创建退还实例请求
 let request = TerminateInstancesRequest {
@@ -253,7 +255,67 @@ let request = TerminateInstancesRequest {
 };
 
 // 发送请求
-let response = instance_service.terminate_instances(&request, "ap-guangzhou").await?;
+let response = instance_operation_service.terminate_instances(&request, "ap-guangzhou").await?;
+```
+
+### 6. 实例询价
+
+```rust
+use tencent_cloud_sdk::{
+    TencentCloudClient,
+    services::cvm::instance_price::{
+        InstancePriceService, InquiryPriceRunInstancesRequest
+    },
+    services::cvm::instance::{
+        Placement, SystemDisk, InstanceChargeType, InstanceChargePrepaid
+    }
+};
+
+// 创建客户端和服务
+let client = TencentCloudClient::new(secret_id, secret_key);
+let instance_price_service = InstancePriceService::new(&client);
+
+// 包年包月实例询价
+let request = InquiryPriceRunInstancesRequest {
+    Placement: Placement {
+        Zone: Some("ap-guangzhou-4".to_string()),
+        ProjectId: None,
+        HostIds: None,
+        HostIps: None,
+        DedicatedClusterId: None,
+    },
+    ImageId: "img-eb30mz89".to_string(), // TencentOS Server 3.2
+    InstanceType: "S5.MEDIUM2".to_string(), // 2核4G
+    SystemDisk: Some(SystemDisk {
+        DiskType: Some("CLOUD_PREMIUM".to_string()), // 高性能云硬盘
+        DiskSize: Some(50),
+        DiskId: None,
+    }),
+    InstanceChargeType: Some(InstanceChargeType::Prepaid),
+    InstanceChargePrepaid: Some(InstanceChargePrepaid {
+        Period: 1, // 购买1个月
+        RenewFlag: Some("NOTIFY_AND_AUTO_RENEW".to_string()), // 到期自动续费
+    }),
+    // 其他参数可以根据需要设置
+    DataDisks: None,
+    InternetAccessible: None,
+    InstanceCount: Some(1),
+    LoginSettings: None,
+    EnhancedService: None,
+    VirtualPrivateCloud: None,
+};
+
+// 发送询价请求
+let response = instance_price_service.inquiry_price_run_instances(&request, "ap-guangzhou").await?;
+
+// 获取价格信息
+let instance_price = response.Response.Price.InstancePrice;
+println!("实例价格: {}", instance_price.DiscountPrice.unwrap_or(0.0));
+
+// 如果有带宽价格信息
+if let Some(bandwidth_price) = response.Response.Price.BandwidthPrice {
+    println!("带宽价格: {}", bandwidth_price.DiscountPrice.unwrap_or(0.0));
+}
 ```
 
 ## 许可证

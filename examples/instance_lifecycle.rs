@@ -1,7 +1,7 @@
 use tencent_cloud_sdk::{
     TencentCloudClient,
-    services::cvm::instance::{
-        InstanceService, StartInstancesRequest, StopInstancesRequest, RebootInstancesRequest
+    services::cvm::instance_operation::{
+        InstanceOperationService, StartInstancesRequest, StopInstancesRequest, RebootInstancesRequest
     }
 };
 use std::env;
@@ -17,8 +17,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建客户端
     let client = TencentCloudClient::new(secret_id, secret_key);
     
-    // 创建实例服务
-    let instance_service = InstanceService::new(&client);
+    // 创建实例操作服务
+    let instance_operation_service = InstanceOperationService::new(&client);
     
     // 设置区域
     let region = "ap-guangzhou";
@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             // 发送启动请求
             println!("正在启动实例...");
-            match instance_service.start_instances(&request, region).await {
+            match instance_operation_service.start_instances(&request, region).await {
                 Ok(_) => {
                     println!("实例启动请求已提交成功");
                     println!("实例将从STOPPED状态变为STARTING状态，然后再变为RUNNING状态");
@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             // 发送关闭请求
             println!("正在关闭实例...");
-            match instance_service.stop_instances(&request, region).await {
+            match instance_operation_service.stop_instances(&request, region).await {
                 Ok(_) => {
                     println!("实例关闭请求已提交成功");
                     println!("实例将从RUNNING状态变为STOPPING状态，然后再变为STOPPED状态");
@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             // 发送重启请求
             println!("正在重启实例...");
-            match instance_service.reboot_instances(&request, region).await {
+            match instance_operation_service.reboot_instances(&request, region).await {
                 Ok(_) => {
                     println!("实例重启请求已提交成功");
                     println!("实例将从RUNNING状态变为REBOOTING状态，然后再变为RUNNING状态");

@@ -37,3 +37,7 @@ path = "examples/instance_terminate.rs"
 [[example]]
 name = "instance_lifecycle"
 path = "examples/instance_lifecycle.rs"
+
+[[example]]
+name = "instance_price_inquiry"
+path = "examples/instance_price_inquiry.rs"
